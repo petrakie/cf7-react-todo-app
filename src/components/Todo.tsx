@@ -1,7 +1,12 @@
-import {useReducer} from 'react';
+import {useEffect, useReducer} from 'react';
 import TodoForm from "./TodoForm.tsx";
 import TodoList from "./TodoList.tsx";
 import type { TodoProps, Action} from "../types.ts"
+
+const getInitialTodos = () => {
+    const stored = localStorage.getItem("todos");
+    return stored ? JSON.parse(stored) : [];
+}
 
 const todoReducer = (state: TodoProps[], action: Action): TodoProps[] => {
     switch (action.type) {
@@ -11,6 +16,7 @@ const todoReducer = (state: TodoProps[], action: Action): TodoProps[] => {
                 {
                     id: Date.now(),
                     text: action.payload,
+                    completed: false,
                 }
             ]
         case "DELETE":
@@ -27,7 +33,13 @@ const todoReducer = (state: TodoProps[], action: Action): TodoProps[] => {
 };
 
 const Todo = () =>{
-    const [todos, dispatch] = useReducer(todoReducer, []);
+    const [todos, dispatch] = useReducer(todoReducer, [], getInitialTodos );
+
+    useEffect(() => {
+        localStorage.setItem("todos", JSON.stringify(todos));
+    }, [todos])
+
+
     return (
         <>
             <div className="max-w-sm mx-auto p-6">
